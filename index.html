@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OBRACTRL — Pedro · Jefe de Obra</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0a0c0f; --bg2:#111318; --bg3:#1a1d24; --border:#232730;
+    --accent:#f59e0b; --accent2:#3b82f6; --red:#ef4444;
+    --green:#22c55e; --yellow:#eab308; --text:#e2e8f0; --muted:#64748b; --card:#13161d;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;min-height:100vh;}
+
+  /* HEADER */
+  .header{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:52px;}
+  .logo{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:var(--accent);}
+  .logo-sub{color:var(--muted);font-size:11px;font-family:'DM Sans',sans-serif;margin-left:10px;}
+  .header-right{display:flex;align-items:center;gap:16px;}
+  .header-date{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);}
+  .header-badge{font-size:9px;font-weight:700;padding:3px 8px;border-radius:4px;background:#422006;color:var(--accent);letter-spacing:.8px;text-transform:uppercase;}
+
+  /* KPI BAR */
+  .kpi-bar{display:grid;grid-template-columns:repeat(5,1fr);border-bottom:1px solid var(--border);background:var(--bg2);}
+  .kpi{padding:12px 16px;border-right:1px solid var(--border);}
+  .kpi:last-child{border-right:none;}
+  .kpi-label{color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:3px;}
+  .kpi-value{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:1px;}
+  .kpi-sub{font-size:9px;color:var(--muted);margin-top:1px;}
+  .kpi-value.ok{color:var(--green);} .kpi-value.warn{color:var(--yellow);}
+  .kpi-value.danger{color:var(--red);} .kpi-value.blue{color:var(--accent2);}
+
+  /* LAYOUT */
+  .main{display:grid;grid-template-columns:1fr 300px;min-height:calc(100vh - 108px);}
+  .left{overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;}
+  .right{border-left:1px solid var(--border);overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px;}
+
+  /* TABS */
+  .tabs{display:flex;gap:4px;flex-wrap:wrap;}
+  .tab{padding:5px 12px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--muted);cursor:pointer;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;transition:all .15s;}
+  .tab:hover{border-color:var(--accent);color:var(--accent);}
+  .tab.active{background:var(--accent);color:#000;border-color:var(--accent);}
+
+  /* OBRA CARDS */
+  .obra-card{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;animation:fadeUp .3s ease both;}
+  .obra-header{padding:12px 14px;display:flex;align-items:flex-start;justify-content:space-between;border-bottom:1px solid var(--border);}
+  .obra-name{font-weight:700;font-size:12px;}
+  .obra-meta{font-size:10px;color:var(--muted);margin-top:2px;}
+  .obra-meta span{color:var(--text);font-weight:500;}
+  .obra-badges{display:flex;gap:5px;align-items:center;flex-wrap:wrap;margin-top:4px;}
+  .badge{padding:2px 7px;border-radius:4px;font-size:9px;font-weight:600;text-transform:uppercase;}
+  .badge.green{background:#14532d;color:var(--green);} .badge.yellow{background:#422006;color:var(--yellow);}
+  .badge.red{background:#450a0a;color:var(--red);} .badge.blue{background:#1e3a5f;color:var(--accent2);}
+  .badge.gray{background:#1e2330;color:var(--muted);} .badge.orange{background:#431407;color:#fb923c;}
+  .obra-header-right{text-align:right;flex-shrink:0;margin-left:10px;}
+  .pressupost-label{font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;}
+  .pressupost-val{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent);font-weight:600;}
+
+  /* OBRA BODY */
+  .obra-body{padding:12px 14px;}
+  .obra-cols{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .progress-section{}
+  .progress-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+  .progress-label{font-size:9px;color:var(--muted);width:80px;text-transform:uppercase;letter-spacing:.5px;}
+  .progress-bar{flex:1;height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;}
+  .progress-fill{height:100%;border-radius:3px;}
+  .pf-green{background:linear-gradient(90deg,#16a34a,#22c55e);}
+  .pf-yellow{background:linear-gradient(90deg,#ca8a04,#eab308);}
+  .pf-red{background:linear-gradient(90deg,#b91c1c,#ef4444);}
+  .pf-blue{background:linear-gradient(90deg,#2563eb,#3b82f6);}
+  .pf-gray{background:linear-gradient(90deg,#374151,#6b7280);}
+  .pf-orange{background:linear-gradient(90deg,#c2410c,#f97316);}
+  .progress-pct{font-family:'JetBrains Mono',monospace;font-size:10px;width:34px;text-align:right;}
+
+  /* COST MINI TABLE */
+  .cost-mini{background:var(--bg3);border-radius:6px;padding:8px 10px;margin-top:2px;}
+  .cost-mini-row{display:flex;justify-content:space-between;font-size:9px;padding:2px 0;border-bottom:1px solid var(--border);}
+  .cost-mini-row:last-child{border-bottom:none;font-weight:600;font-size:10px;padding-top:4px;}
+  .cost-mini-label{color:var(--muted);}
+  .cost-mini-val{font-family:'JetBrains Mono',monospace;}
+
+  /* DESVIATION INDICATOR */
+  .desv-box{background:var(--bg3);border-radius:6px;padding:8px 10px;margin-top:8px;display:flex;align-items:center;gap:8px;}
+  .desv-icon{font-size:14px;}
+  .desv-text{font-size:9px;color:var(--muted);line-height:1.4;}
+  .desv-val{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;}
+  .desv-val.pos{color:var(--green);} .desv-val.neg{color:var(--red);} .desv-val.neutral{color:var(--muted);}
+
+  /* TASKS */
+  .tasks-title{font-size:9px;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);margin-bottom:7px;margin-top:10px;display:flex;justify-content:space-between;align-items:center;}
+  .tasks-count{font-family:'JetBrains Mono',monospace;font-size:9px;}
+  .task-item{display:flex;align-items:center;gap:7px;padding:6px 9px;border-radius:6px;background:var(--bg3);margin-bottom:3px;border-left:3px solid transparent;cursor:pointer;transition:all .15s;}
+  .task-item:hover{background:#1f2330;}
+  .task-item.done{opacity:.4;}
+  .task-item.urgent{border-left-color:var(--red);} .task-item.normal{border-left-color:var(--accent2);} .task-item.pending{border-left-color:var(--muted);}
+  .task-check{width:13px;height:13px;border-radius:3px;border:1.5px solid var(--muted);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+  .task-check.checked{background:var(--green);border-color:var(--green);color:#000;font-size:9px;font-weight:900;}
+  .task-text{flex:1;font-size:11px;}
+  .task-text.done{text-decoration:line-through;color:var(--muted);}
+  .task-tag{font-size:8px;padding:1px 5px;border-radius:3px;font-weight:600;text-transform:uppercase;flex-shrink:0;}
+  .tag-cost{background:#422006;color:var(--yellow);} .tag-exec{background:#1e3a5f;color:var(--accent2);}
+  .tag-doc{background:#1e2330;color:var(--muted);} .tag-urgent{background:#450a0a;color:var(--red);}
+  .tag-plan{background:#1a2040;color:#818cf8;}
+
+  /* PLANNING MINI */
+  .planning-mini{background:var(--bg3);border-radius:6px;padding:8px 10px;margin-top:8px;}
+  .plan-row{display:flex;align-items:center;gap:8px;padding:3px 0;border-bottom:1px solid var(--border);}
+  .plan-row:last-child{border-bottom:none;}
+  .plan-id{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--muted);width:14px;}
+  .plan-name{font-size:10px;flex:1;}
+  .plan-dates{font-size:8px;color:var(--muted);font-family:'JetBrains Mono',monospace;white-space:nowrap;}
+  .plan-bar-wrap{width:80px;height:5px;background:var(--bg2);border-radius:3px;overflow:hidden;}
+  .plan-bar-fill{height:100%;background:linear-gradient(90deg,#2563eb,#60a5fa);border-radius:3px;}
+
+  /* CERT PILLS */
+  .cert-row{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px;margin-bottom:2px;}
+  .cert-pill{font-size:8px;font-family:'JetBrains Mono',monospace;padding:2px 6px;border-radius:3px;background:var(--bg3);border:1px solid var(--border);color:var(--muted);}
+  .cert-pill.done{background:#14532d22;border-color:#16a34a44;color:var(--green);}
+  .cert-pill.pending{background:#42200622;border-color:#ca8a0444;color:var(--yellow);}
+
+  /* RIGHT PANEL */
+  .panel-title{font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:5px;}
+  .pdot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+  .alert{padding:9px 11px;border-radius:7px;margin-bottom:5px;border-left:3px solid;}
+  .alert.red{background:#450a0a22;border-color:var(--red);} .alert.yellow{background:#42200622;border-color:var(--yellow);} .alert.blue{background:#1e3a5f22;border-color:var(--accent2);}
+  .alert.green{background:#14532d22;border-color:var(--green);}
+  .alert-title{font-weight:600;font-size:10px;margin-bottom:2px;}
+  .alert-sub{font-size:9px;color:var(--muted);line-height:1.4;}
+  .alert-obra{font-size:8px;font-family:'JetBrains Mono',monospace;margin-top:3px;color:var(--accent);}
+  .cost-row-panel{display:flex;align-items:center;justify-content:space-between;padding:7px 9px;border-radius:6px;background:var(--bg3);margin-bottom:4px;}
+  .cost-obra-panel{font-size:10px;font-weight:600;}
+  .cost-sub-panel{font-size:8px;color:var(--muted);margin-top:1px;}
+  .cost-num-panel{font-family:'JetBrains Mono',monospace;font-size:11px;}
+  .cost-dev-panel{font-size:8px;margin-top:1px;text-align:right;}
+  .cost-dev-panel.pos{color:var(--green);} .cost-dev-panel.neg{color:var(--red);} .cost-dev-panel.neutral{color:var(--muted);}
+
+  /* MINI CAL */
+  .mini-cal{background:var(--bg3);border-radius:7px;padding:10px;}
+  .cal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+  .cal-month{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1px;}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;text-align:center;}
+  .cal-day-name{font-size:8px;color:var(--muted);padding:2px 0;}
+  .cal-day{font-size:9px;padding:3px 1px;border-radius:3px;cursor:pointer;position:relative;}
+  .cal-day:hover{background:var(--border);}
+  .cal-day.today{background:var(--accent);color:#000;font-weight:700;}
+  .cal-day.empty{color:transparent;}
+  .cal-day.event-had::after{content:'';position:absolute;bottom:1px;left:50%;transform:translateX(-50%);width:3px;height:3px;background:#60a5fa;border-radius:50%;}
+  .cal-day.event-cert::after{content:'';position:absolute;bottom:1px;left:50%;transform:translateX(-50%);width:3px;height:3px;background:var(--yellow);border-radius:50%;}
+
+  /* DRIVE LINKS */
+  .drive-links{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px;}
+  .drive-link{font-size:8px;padding:2px 7px;border-radius:3px;background:var(--bg3);border:1px solid var(--border);color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:4px;transition:all .15s;}
+  .drive-link:hover{border-color:var(--accent);color:var(--accent);}
+
+  /* SEPARADOR */
+  .section-divider{height:1px;background:var(--border);margin:8px 0;}
+
+  ::-webkit-scrollbar{width:3px;} ::-webkit-scrollbar-track{background:var(--bg);} ::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+  @media(max-width:700px){
+    .main{grid-template-columns:1fr;}
+    .right{border-left:none;border-top:1px solid var(--border);}
+    .kpi-bar{grid-template-columns:repeat(3,1fr);}
+    .obra-cols{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div>
+    <span class="logo">OBRA<span style="color:var(--accent2)">CTRL</span></span>
+    <span class="logo-sub">Pedro Moreno · O3 Construccions · Barcelona</span>
+  </div>
+  <div class="header-right">
+    <span class="header-badge" id="header-badge-date">Actualitzat: —</span>
+    <div class="header-date" id="fecha"></div>
+  </div>
+</div>
+
+<!-- KPI BAR -->
+<div class="kpi-bar">
+  <div class="kpi">
+    <div class="kpi-label">Obres actives</div>
+    <div class="kpi-value blue">4</div>
+    <div class="kpi-sub">En seguiment O3</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">Coste real acum.</div>
+    <div class="kpi-value warn" data-val="kpi.cost_total">1.096K€</div>
+    <div class="kpi-sub">3 obres en execució</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">Certif. acumulada</div>
+    <div class="kpi-value ok" data-val="kpi.cert_total">1.078K€</div>
+    <div class="kpi-sub" data-val="kpi.cert_sub">Irla (cert. 15 · gen26)</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">Alertes</div>
+    <div class="kpi-value danger">2</div>
+    <div class="kpi-sub">1 crítica · 1 moderada</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">HAD inici</div>
+    <div class="kpi-value" id="kpi-had-days" style="color:var(--accent)">10</div>
+    <div class="kpi-sub">dies per a l'inici</div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <!-- LEFT -->
+  <div class="left">
+    <div class="tabs">
+      <div class="tab active" onclick="setTab('totes',this)">Totes</div>
+      <div class="tab" onclick="setTab('had',this)">HAD i PADES</div>
+      <div class="tab" onclick="setTab('rambla',this)">Cap Rambla</div>
+      <div class="tab" onclick="setTab('xirgu',this)">Xirgu</div>
+      <div class="tab" onclick="setTab('irla',this)">Irla / Sitges</div>
+    </div>
+
+    <!-- ========== HAD I PADES ========== -->
+    <div class="obra-card" id="card-had">
+      <div class="obra-header">
+        <div>
+          <div class="obra-name">🏥 Mutua Terrassa HAD i PADES</div>
+          <div class="obra-meta">C/ St. Cristòfol, 56–58 · Terrassa · Ref. <span>SIS-0041-HAD</span> · Inici: <span>07/04/2026</span> · Fi previst: <span>12/06/2026</span></div>
+          <div class="obra-badges">
+            <span class="badge gray">Preoperacional</span>
+            <span class="badge blue">49 dies d'obra</span>
+            <span id="diasHadBadge" class="badge orange"></span>
+          </div>
+        </div>
+        <div class="obra-header-right">
+          <div class="pressupost-label">Pressupost venda</div>
+          <div class="pressupost-val">156.624 €</div>
+          <div style="font-size:8px;color:var(--muted);margin-top:2px;">Cost planif.: 125.426 €</div>
+          <div style="font-size:8px;color:var(--green);margin-top:1px;">Marge: 19,9%</div>
+        </div>
+      </div>
+      <div class="obra-body">
+        <div class="obra-cols">
+          <div class="progress-section">
+            <div class="progress-row">
+              <div class="progress-label">Execució</div>
+              <div class="progress-bar"><div class="progress-fill pf-gray" style="width:0%"></div></div>
+              <div class="progress-pct" style="color:var(--muted)">0%</div>
+            </div>
+            <div class="progress-row">
+              <div class="progress-label">Certificat</div>
+              <div class="progress-bar"><div class="progress-fill pf-blue" style="width:0%"></div></div>
+              <div class="progress-pct" style="color:var(--muted)">0%</div>
+            </div>
+            <div class="progress-row">
+              <div class="progress-label">Cost real</div>
+              <div class="progress-bar"><div class="progress-fill pf-gray" style="width:0%"></div></div>
+              <div class="progress-pct" style="color:var(--muted)">0%</div>
+            </div>
+            <div class="desv-box" style="margin-top:4px;">
+              <div>
+                <div class="desv-val neutral">—</div>
+                <div class="desv-text">Obra no iniciada · Cost real: 0 €<br>Pres. cost planif.: 125.426 €</div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="cost-mini">
+              <div style="font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px;">Capítols principals</div>
+              <div class="cost-mini-row"><span class="cost-mini-label">Tancaments/Div.</span><span class="cost-mini-val" style="color:var(--text)">21.326 €</span></div>
+              <div class="cost-mini-row"><span class="cost-mini-label">Paviments</span><span class="cost-mini-val" style="color:var(--text)">15.585 €</span></div>
+              <div class="cost-mini-row"><span class="cost-mini-label">Revestiments</span><span class="cost-mini-val" style="color:var(--text)">15.159 €</span></div>
+              <div class="cost-mini-row"><span class="cost-mini-label">Enderrocs</span><span class="cost-mini-val" style="color:var(--text)">12.003 €</span></div>
+              <div class="cost-mini-row"><span class="cost-mini-label">TOTAL PLANIF.</span><span class="cost-mini-val" style="color:var(--accent)">125.426 €</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Planning -->
+        <div class="tasks-title">Planning HAD i PADES — Actualitzat 24/03/2026</div>
+        <div class="planning-mini">
+          <div class="plan-row"><div class="plan-id">02</div><div class="plan-name">Actuacions Prèvies</div><div class="plan-dates">07/04 → 08/04</div></div>
+          <div class="plan-row"><div class="plan-id">03</div><div class="plan-name">Enderrocs</div><div class="plan-dates">09/04 → 25/04</div></div>
+          <div class="plan-row"><div class="plan-id">04</div><div class="plan-name">Estructura</div><div class="plan-dates">16/04 → 22/04</div></div>
+          <div class="plan-row"><div class="plan-id">05</div><div class="plan-name">Cobertes</div><div class="plan-dates">27/04 → 05/05</div></div>
+          <div class="plan-row"><div class="plan-id">06</div><div class="plan-name">Pladur</div><div class="plan-dates">27/04 → 09/05</div></div>
+          <div class="plan-row"><div class="plan-id">07</div><div class="plan-name">Sostres</div><div class="plan-dates">11/05 → 23/05</div></div>
+          <div class="plan-row"><div class="plan-id">08</div><div class="plan-name">Serralleria</div><div class="plan-dates">28/04 → 02/05</div></div>
+          <div class="plan-row"><div class="plan-id">10</div><div class="plan-name">Sanitaris</div><div class="plan-dates">16/05 → 22/05</div></div>
+          <div class="plan-row"><div class="plan-id">12</div><div class="plan-name">Paviments</div><div class="plan-dates">25/05 → 29/05</div></div>
+          <div class="plan-row"><div class="plan-id">14</div><div class="plan-name">Pintura</div><div class="plan-dates">29/05 → 09/06</div></div>
+          <div class="plan-row"><div class="plan-id">15</div><div class="plan-name">Neteges finals</div><div class="plan-dates">10/06 → 12/06</div></div>
+        </div>
+
+        <div class="tasks-title">Tasques prèvies a l'inici
+          <span class="tasks-count" id="count-had">0/4</span>
+        </div>
+        <div class="task-item urgent" onclick="toggleTask(this,'had')"><div class="task-check"></div><div class="task-text">Confirmar subcontratas i recursos 1a fase (enderrocs / estructura)</div><span class="task-tag tag-urgent">Urgent</span></div>
+        <div class="task-item normal" onclick="toggleTask(this,'had')"><div class="task-check"></div><div class="task-text">Revisar planning definitiu amb direcció facultativa</div><span class="task-tag tag-doc">Doc</span></div>
+        <div class="task-item pending" onclick="toggleTask(this,'had')"><div class="task-check"></div><div class="task-text">Sol·licitar ofertes materials 1a fase · Pressupost 125.426 €</div><span class="task-tag tag-cost">Cost</span></div>
+        <div class="task-item pending" onclick="toggleTask(this,'had')"><div class="task-check"></div><div class="task-text">Preparar acta d'inici i documentació PRL</div><span class="task-tag tag-doc">Doc</span></div>
+
+        <div class="drive-links">
+          <a class="drive-link" href="https://drive.google.com/drive/folders/1Em_DipDPvaL7eWtEerVoZb0ugaXMOVPr" target="_blank">📁 Carpeta Drive</a>
+          <a class="drive-link" href="https://drive.google.com/drive/folders/1vOcigeVFFpfkR3TY3Qf6Cf9ifJ0sQZcn" target="_blank">💰 Pressupostos</a>
+          <a class="drive-link" href="https://drive.google.com/drive/folders/1Aoh1QuXuci-jvelFPhBnZptbiIKL4Xjn" target="_blank">📋 Certificació</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== MT_CAP_RAMBLA ========== -->
+    <div class="obra-card" id="card-rambla">
+      <div class="obra-header">
+        <div>
+          <div class="obra-name">🏢 Mutua Terrassa Cap Rambla</div>
+          <div class="obra-meta">Terrassa · Ref. <span>SIS-0041-CR</span> · 6 certificacions emeses (jul25–feb26)</div>
+          <div class="obra-badges">
+            <span class="badge green">En marxa</span>
+            <span class="badge blue">6ª cert. febrer 2026</span>
+          </div>
+        </div>
+        <div class="obra-header-right">
+          <div class="pressupost-label">Cost real acum.</div>
+          <div class="pressupost-val" data-val="rambla.cost_real_eur">103.061 €</div>
+          <div style="font-size:8px;color:var(--green);margin-top:2px;">Cost controlat ✓</div>
+        </div>
+      </div>
+      <div class="obra-body">
+        <div class="obra-cols">
+          <div class="progress-section">
+            <div class="progress-row">
+              <div class="progress-label">Execució</div>
+              <div class="progress-bar"><div class="progress-fill pf-green" style="width:62%"></div></div>
+              <div class="progress-pct" style="color:var(--green)">~62%</div>
+            </div>
+            <div class="progress-row">
+              <div class="progress-label">Certificat</div>
+              <div class="progress-bar"><div class="progress-fill pf-blue" style="width:60%"></div></div>
+              <div class="progress-pct" style="color:var(--accent2)">~60%</div>
+            </div>
+            <div class="progress-row">
+              <div class="progress-label">Cost real</div>
+              <div class="progress-bar"><div class="progress-fill pf-green" style="width:59%"></div></div>
+              <div class="progress-pct" style="color:var(--green)">~59%</div>
+            </div>
+            <div class="desv-box">
+              <div>
+                <div class="desv-val pos">OK</div>
+                <div class="desv-text">Cost real &lt; execució<br>Marge positiu en curs</div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="cost-mini">
+              <div style="font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px;">Desglossament cost real</div>
+              <div class="cost-mini-row"><span class="cost-mini-label">Industrials</span><span class="cost-mini-val" style="color:var(--text)">46.248 €</span></div>
+              <div class="cost-mini-row"><span class="cost-mini-label">Mà d'obra dir.</span><span class="cost-mini-val" style="color:var(--text)">33.720 €</span></div>
+              <div class="cost-mini-row"><span class="cost-mini-label">Materials</span><span class="cost-mini-val" style="color:var(--text)">16.244 €</span></div>
+              <div class="cost-mini-row"><span class="cost-mini-label">Mà d'obra ind.</span><span class="cost-mini-val" style="color:var(--text)">6.842 €</span></div>
+              <div class="cost-mini-row"><span class="cost-mini-label">TOTAL REAL</span><span class="cost-mini-val" style="color:var(--accent)" data-val="rambla.mini_total">103.061 €</span></div>
+            </div>
+            <div style="margin-top:6px;">
+              <div style="font-size:8px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.8px;">Certificacions emeses</div>
+              <div class="cert-row">
+                <span class="cert-pill done">1ª JUL25</span>
+                <span class="cert-pill done">2ª AGO25</span>
+                <span class="cert-pill done">3ª OCT25</span>
+                <span class="cert-pill done">4ª DES25</span>
+                <span class="cert-pill done">5ª GEN26</span>
+                <span class="cert-pill done">6ª FEB26</span>
+                <span class="cert-pill pending">7ª MAR26?</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tasks-title">Tasques d'avui
+          <span class="tasks-count" id="count-rambla">0/3</span>
+        </div>
+        <div class="task-item normal" onclick="toggleTask(this,'rambla')"><div class="task-check"></div><div class="task-text">Visita obra — revisió acabats planta 1ª</div><span class="task-tag tag-exec">Execució</span></div>
+        <div class="task-item pending" onclick="toggleTask(this,'rambla')"><div class="task-check"></div><div class="task-text">Revisió comparatiu proveïdors — paviment tècnic</div><span class="task-tag tag-cost">Cost</span></div>
+        <div class="task-item pending" onclick="toggleTask(this,'rambla')"><div class="task-check"></div><div class="task-text">Preparar 7ª certificació març 2026</div><span class="task-tag tag-doc">Doc</span></div>
+
+        <div class="drive-links">
+          <a class="drive-link" href="https://drive.google.com/drive/folders/1l-jz6a-YS3VUl0ztxkUHvIQPQ124n8_R" target="_blank">📁 Carpeta Drive</a>
+          <a class="drive-link" href="https://drive.google.com/drive/folders/1qnOMRh10vn03d7LdY0eEZAW2t3WE7ZTp" target="_blank">📋 Certificació</a>
+          <a class="drive-link" href="https://drive.google.com/drive/folders/1LelOrlnOIrepaA3Dcj84XzM6qjPhnEBA" target="_blank">🏭 Industrials</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== MARGARIDA XIRGU ========== -->
+    <div class="obra-card" id="card-xirgu">
+      <div class="obra-header">
+        <div>
+          <div class="obra-name">🏗️ Margarida Xirgu 24 — Sitges</div>
+          <div class="obra-meta">Sitges · Ref. <span>SIS-0042</span> · Client: Malena Invest SLU · <span>Pressupost obert</span></div>
+          <div class="obra-badges">
+            <span class="badge green">Marge positiu</span>
+            <span class="badge yellow">Pressupost obert</span>
+            <span class="badge blue">5ª cert. emesa</span>
+          </div>
+        </div>
+        <div class="obra-header-right">
+          <div class="pressupost-label" data-val="xirgu.fact_label">Facturat acum. (cert. 5ª)</div>
+          <div class="pressupost-val" style="color:var(--accent2)" data-val="xirgu.facturat_eur">91.554 €</div>
+          <div style="font-size:8px;color:var(--green);margin-top:2px;" data-val="xirgu.cost_real_sub">Cost real: 69.928 €</div>
+          <div style="font-size:8px;color:var(--green);margin-top:1px;" data-val="xirgu.marge_sub">Marge: +21.626 € (+23,6%)</div>
+        </div>
+      </div>
+      <div class="obra-body">
+        <div class="obra-cols">
+          <div class="progress-section">
+            <div class="progress-row">
+              <div class="progress-label">Facturat</div>
+              <div class="progress-bar"><div class="progress-fill pf-blue" style="width:100%"></div></div>
+              <div class="progress-pct" style="color:var(--accent2)" data-val="xirgu.prog_fact">91.554€</div>
+            </div>
+            <div class="progress-row">
+              <div class="progress-label">Cost real</div>
+              <div class="progress-bar"><div class="progress-fill pf-green" data-width="xirgu.cost_bar_w" style="width:76%"></div></div>
+              <div class="progress-pct" style="color:var(--green)" data-val="xirgu.prog_cost">69.928€</div>
+            </div>
+            <div class="progress-row">
+              <div class="progress-label">Marge O3</div>
+              <div class="progress-bar"><div class="progress-fill pf-green" data-width="xirgu.marge_bar_w" style="width:24%"></div></div>
+              <div class="progress-pct" style="color:var(--green)" data-val="xirgu.prog_marge">+23,6%</div>
+            </div>
+            <div class="desv-box">
+              <div>
+                <div class="desv-val pos" data-val="xirgu.desv_val">+23,6%</div>
+                <div class="desv-text" data-html="xirgu.desv_text">Facturat 91.554€ − Cost 69.928€<br>= Marge +21.626 € · Pressupost obert</div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="cost-mini">
+              <div style="font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px;">Cost real vs Facturat (cert. acum.)</div>
+              <div class="cost-mini-row"><span class="cost-mini-label">Cert. 1–4 acum.</span><span class="cost-mini-val" style="color:var(--accent2)">66.726 €</span></div>
+              <div class="cost-mini-row"><span class="cost-mini-label">Cert. 5ª</span><span class="cost-mini-val" style="color:var(--accent2)">24.828 €</span></div>
+              <div class="cost-mini-row"><span class="cost-mini-label">TOTAL FACTURAT</span><span class="cost-mini-val" style="color:var(--accent2)" data-val="xirgu.mini_fact">91.554 €</span></div>
+              <div class="cost-mini-row"><span class="cost-mini-label">Cost real acum.</span><span class="cost-mini-val" style="color:var(--text)" data-val="xirgu.mini_cost">69.928 €</span></div>
+              <div class="cost-mini-row"><span class="cost-mini-label">MARGE REAL</span><span class="cost-mini-val" style="color:var(--green)" data-val="xirgu.mini_marge">+21.626 €</span></div>
+            </div>
+            <div style="margin-top:6px;">
+              <div style="font-size:8px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.8px;">Certificacions emeses</div>
+              <div class="cert-row">
+                <span class="cert-pill done">1ª</span>
+                <span class="cert-pill done">2ª</span>
+                <span class="cert-pill done">3ª</span>
+                <span class="cert-pill done">4ª GEN26</span>
+                <span class="cert-pill done">5ª FEB26</span>
+                <span class="cert-pill pending">6ª MAR26?</span>
+              </div>
+              <div style="font-size:8px;color:var(--muted);margin-top:6px;line-height:1.5;">⚠ Pressupost obert: el client va<br>afegint feines sobre la marxa.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tasks-title">Tasques prioritàries
+          <span class="tasks-count" id="count-xirgu">0/3</span>
+        </div>
+        <div class="task-item normal" onclick="toggleTask(this,'xirgu')"><div class="task-check"></div><div class="task-text">Preparar 6ª certificació · Cost últim mes feb26: 17.289 €</div><span class="task-tag tag-doc">Doc</span></div>
+        <div class="task-item normal" onclick="toggleTask(this,'xirgu')"><div class="task-check"></div><div class="task-text">Control presència personal — EXCARIBES + personal O3</div><span class="task-tag tag-exec">Execució</span></div>
+        <div class="task-item pending" onclick="toggleTask(this,'xirgu')"><div class="task-check"></div><div class="task-text">Registrar noves feines demanades pel client al control de costos</div><span class="task-tag tag-cost">Cost</span></div>
+
+        <div class="drive-links">
+          <a class="drive-link" href="https://drive.google.com/drive/folders/1jqZztZ63pmn_33jy6kMOEG9Hyf9meqyJ" target="_blank">📁 Carpeta Drive</a>
+          <a class="drive-link" href="https://drive.google.com/drive/folders/1qhONCdj3Zv1BXA3RWRc6CqK_GZGodllE" target="_blank">📋 Certificació</a>
+          <a class="drive-link" href="https://drive.google.com/drive/folders/1eqsqdsY9O3uFLdQ3iNLv2SWPlxSOpXQO" target="_blank">🏭 Industrials</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== JOSEP IRLA / SITGES ========== -->
+    <div class="obra-card" id="card-irla">
+      <div class="obra-header">
+        <div>
+          <div class="obra-name">🏠 Josep Irla 32 — Sitges La Plana</div>
+          <div class="obra-meta">Sitges · Obra nova · Ref. <span>2410012</span> · Cert. nº15 emesa (gen26)</div>
+          <div class="obra-badges">
+            <span class="badge green">Fase final</span>
+            <span class="badge blue">92,9% certificat</span>
+          </div>
+        </div>
+        <div class="obra-header-right">
+          <div class="pressupost-label">Pressupost total</div>
+          <div class="pressupost-val">1.160.970 €</div>
+          <div style="font-size:8px;color:var(--green);margin-top:2px;" data-val="irla.cert_acum_sub">Cert. acum.: 1.078.506 €</div>
+          <div style="font-size:8px;color:var(--muted);margin-top:1px;" data-val="irla.pend_sub">Pendent: 82.464 €</div>
+        </div>
+      </div>
+      <div class="obra-body">
+        <div class="obra-cols">
+          <div class="progress-section">
+            <div class="progress-row">
+              <div class="progress-label">Execució</div>
+              <div class="progress-bar"><div class="progress-fill pf-green" style="width:95%"></div></div>
+              <div class="progress-pct" style="color:var(--green)">~95%</div>
+            </div>
+            <div class="progress-row">
+              <div class="progress-label">Certificat</div>
+              <div class="progress-bar"><div class="progress-fill pf-blue" data-width="irla.cert_pct_bar" style="width:92.9%"></div></div>
+              <div class="progress-pct" style="color:var(--accent2)">92,9%</div>
+            </div>
+            <div class="progress-row">
+              <div class="progress-label">Cost real</div>
+              <div class="progress-bar"><div class="progress-fill pf-green" style="width:79%"></div></div>
+              <div class="progress-pct" style="color:var(--green)">~79%</div>
+            </div>
+            <div class="desv-box">
+              <div>
+                <div class="desv-val pos">OK</div>
+                <div class="desv-text" data-html="irla.desv_text">Cost real ~921K€ vs cert. 1.079K€<br>Marge positiu · Recta final</div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="cost-mini">
+              <div style="font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px;">Estat certificació (cert.15)</div>
+              <div class="cost-mini-row"><span class="cost-mini-label">Pressupost total</span><span class="cost-mini-val" style="color:var(--text)">1.160.970 €</span></div>
+              <div class="cost-mini-row"><span class="cost-mini-label">Cert. origen acum.</span><span class="cost-mini-val" style="color:var(--accent2)" data-val="irla.mini_cert_acum">1.078.506 €</span></div>
+              <div class="cost-mini-row"><span class="cost-mini-label">Cert. mes (gen26)</span><span class="cost-mini-val" style="color:var(--text)" data-val="irla.mini_cert_mes">101.089 €</span></div>
+              <div class="cost-mini-row"><span class="cost-mini-label">Pendent certif.</span><span class="cost-mini-val" style="color:var(--yellow)" data-val="irla.mini_pendent">82.464 €</span></div>
+              <div class="cost-mini-row"><span class="cost-mini-label">% Certificat</span><span class="cost-mini-val" style="color:var(--green)" data-val="irla.mini_pct">92,9%</span></div>
+            </div>
+            <div style="margin-top:6px;">
+              <div style="font-size:8px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.8px;">Partides pendents (cert.15)</div>
+              <div style="font-size:9px;color:var(--muted);line-height:1.6;">
+                Urbanització: 24.107 € pend.<br>
+                Façana: 22.760 € pend.<br>
+                Piscina: 9.997 € pend.<br>
+                Paviments: 17.773 € pend.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tasks-title">Tasques tancament d'obra
+          <span class="tasks-count" id="count-irla">0/3</span>
+        </div>
+        <div class="task-item normal" onclick="toggleTask(this,'irla')"><div class="task-check"></div><div class="task-text">Cert. nº16: urbanització (24.107€) + façana (22.760€) + piscina (9.997€)</div><span class="task-tag tag-cost">Cost</span></div>
+        <div class="task-item pending" onclick="toggleTask(this,'irla')"><div class="task-check"></div><div class="task-text">Revisar paviments pendents (17.773 €) i fusteria interior (-2.095 €)</div><span class="task-tag tag-exec">Execució</span></div>
+        <div class="task-item pending" onclick="toggleTask(this,'irla')"><div class="task-check"></div><div class="task-text">Preparar documentació tancament d'obra i liquidació final</div><span class="task-tag tag-doc">Doc</span></div>
+
+        <div class="drive-links">
+          <a class="drive-link" href="https://drive.google.com/drive/folders/1EHLzCmGAJuEsp5trnRjKGyZDZZKUhDvz" target="_blank">📁 Carpeta Drive</a>
+          <a class="drive-link" href="https://drive.google.com/drive/folders/1IlDbRvN3Dd8LcCwFHYNbOC2H23_n47T6" target="_blank">📋 Certificació</a>
+          <a class="drive-link" href="https://drive.google.com/drive/folders/1qgDGSfpXSpfShpz_JXLQ58HTacEwZ3BM" target="_blank">🏭 Industrials</a>
+        </div>
+      </div>
+    </div>
+  </div><!-- /left -->
+
+  <!-- RIGHT PANEL -->
+  <div class="right">
+
+    <!-- ALERTES -->
+    <div>
+      <div class="panel-title"><span class="pdot" style="background:var(--red)"></span>Alertes actives</div>
+      <div class="alert green">
+        <div class="alert-title">✅ Margarida Xirgu — Marge positiu +23,6%</div>
+        <div class="alert-sub" data-val="xirgu.alert_sub">Facturat acum. cert. 5ª: 91.554€ · Cost real: 69.928€ · Marge: +21.626€. Pressupost obert: el client afegeix feines sobre la marxa. Preparar 6ª certificació.</div>
+        <div class="alert-obra">SIS-0042 · Margarida Xirgu 24 Sitges · Cert. nº5 emesa</div>
+      </div>
+      <div class="alert yellow">
+        <div class="alert-title">📋 7ª Certificació pendent</div>
+        <div class="alert-sub">Tancament de mes. La 6ª cert. va ser febrer 2026. Preparar i emetre la 7ª certificació de Cap Rambla.</div>
+        <div class="alert-obra">SIS-0041-CR · Mutua Terrassa Cap Rambla</div>
+      </div>
+      <div class="alert blue">
+        <div class="alert-title">🏥 HAD i PADES — 10 dies per a l'inici</div>
+        <div class="alert-sub">Inici 07/04/2026. Confirmar subcontratas, planning DF i materials 1a fase. Pressupost: 156.624 €.</div>
+        <div class="alert-obra">MT-HAD-26 · St. Cristòfol 56–58, Terrassa</div>
+      </div>
+      <div class="alert green">
+        <div class="alert-title">✅ Irla / Sitges — Recta final</div>
+        <div class="alert-sub">92,9% certificat. Cert. nº16 pendent: ~82.464 €. Urbanització i façana pendents.</div>
+        <div class="alert-obra">2410012 · Josep Irla 32 Sitges</div>
+      </div>
+    </div>
+
+    <!-- CONTROL COSTOS RESUM -->
+    <div>
+      <div class="panel-title"><span class="pdot" style="background:var(--accent)"></span>Control de costos · Resum</div>
+      <div class="cost-row-panel">
+        <div>
+          <div class="cost-obra-panel">HAD i PADES</div>
+          <div class="cost-sub-panel">No iniciada · Pres. 156.624 €</div>
+        </div>
+        <div style="text-align:right">
+          <div class="cost-num-panel" style="color:var(--muted)">0 €</div>
+          <div class="cost-dev-panel neutral">Preoperacional</div>
+        </div>
+      </div>
+      <div class="cost-row-panel">
+        <div>
+          <div class="cost-obra-panel">Cap Rambla</div>
+          <div class="cost-sub-panel" data-val="rambla.panel_sub">103.061 € · 6 certifs.</div>
+        </div>
+        <div style="text-align:right">
+          <div class="cost-num-panel" style="color:var(--green)">Cost OK</div>
+          <div class="cost-dev-panel pos">↓ Controlat</div>
+        </div>
+      </div>
+      <div class="cost-row-panel">
+        <div>
+          <div class="cost-obra-panel">Margarida Xirgu</div>
+          <div class="cost-sub-panel" data-val="xirgu.panel_sub">69.928€ real / 91.554€ facturat (pressupost obert)</div>
+        </div>
+        <div style="text-align:right">
+          <div class="cost-num-panel" style="color:var(--green)" data-val="xirgu.panel_pct">+23,6%</div>
+          <div class="cost-dev-panel pos">↓ Marge positiu</div>
+        </div>
+      </div>
+      <div class="cost-row-panel">
+        <div>
+          <div class="cost-obra-panel">Irla / Sitges</div>
+          <div class="cost-sub-panel" data-val="irla.panel_sub">~921K€ cost / 1.079K€ cert.</div>
+        </div>
+        <div style="text-align:right">
+          <div class="cost-num-panel" style="color:var(--green)">OK</div>
+          <div class="cost-dev-panel pos">↓ Marge positiu</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TASQUES GLOBALS -->
+    <div>
+      <div class="panel-title"><span class="pdot" style="background:var(--accent2)"></span>Tasques totals avui · <span id="global-count" style="color:var(--accent);margin-left:4px;">0/13</span></div>
+      <div style="font-size:9px;color:var(--muted);line-height:2;">
+        <div>HAD: <span id="s-had" style="color:var(--text);">0/4</span></div>
+        <div>Cap Rambla: <span id="s-rambla" style="color:var(--text);">0/3</span></div>
+        <div>Xirgu: <span id="s-xirgu" style="color:var(--text);">0/3</span></div>
+        <div>Irla: <span id="s-irla" style="color:var(--text);">0/3</span></div>
+      </div>
+    </div>
+
+    <!-- CALENDARI -->
+    <div>
+      <div class="panel-title"><span class="pdot" style="background:var(--accent2)"></span>Calendari — <span class="cal-panel-month">—</span></div>
+      <div class="mini-cal" id="miniCal"></div>
+      <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:4px;font-size:8px;color:var(--muted);"><span style="width:6px;height:6px;border-radius:50%;background:#60a5fa;display:inline-block;"></span>Inici HAD</div>
+        <div style="display:flex;align-items:center;gap:4px;font-size:8px;color:var(--muted);"><span style="width:6px;height:6px;border-radius:50%;background:var(--yellow);display:inline-block;"></span>Certif. prevista</div>
+      </div>
+    </div>
+
+    <!-- FONT DE DADES -->
+    <div style="background:var(--bg3);border-radius:7px;padding:10px;">
+      <div class="panel-title" style="margin-bottom:6px;"><span class="pdot" style="background:var(--green)"></span>Font de dades</div>
+      <div style="font-size:9px;color:var(--muted);line-height:1.8;">
+        <div>✓ Control COSTOS CAP Rambla.xlsx</div>
+        <div>✓ SIS 6ª certif. febrer26 CAP RAMBLA.xlsx</div>
+        <div>✓ Control costos Margarida Xirgu.xlsx</div>
+        <div>✓ Certificació 1-5 Xirgu (xls)</div>
+        <div>✓ Control costes Josep Irla Sitges.xlsx</div>
+        <div>✓ Certif. nº15 Josep Irla (gen26).xlsx</div>
+        <div>✓ Pressupost HAD i PADES.xlsx</div>
+        <div>✓ Planning HAD i PADES 24/03/2026.xlsx</div>
+        <div>✓ SIS0042 Xirgu - 2026.03.06.pdf (pressupost oficial)</div>
+        <div style="margin-top:4px;color:#374151;" id="actualitzat-date">Actualitzat: —</div>
+      </div>
+    </div>
+
+  </div><!-- /right -->
+</div><!-- /main -->
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     OBRACTRL DATA BLOCK — actualitzat per generar_dashboard.py
+     NO editar manualment. Clau: OBRACTRL_DATA_START / END
+     ═══════════════════════════════════════════════════════════ -->
+<script id="obraData" type="application/json">
+{
+  "kpi": {
+    "cost_total": "1.096K€",
+    "cert_total": "1.078K€",
+    "cert_sub": "Irla (cert. 15 · gen26)"
+  },
+  "rambla": {
+    "cost_real_eur": "103.061 €",
+    "mini_total": "103.061 €",
+    "panel_sub": "103.061 € · 6 certifs."
+  },
+  "xirgu": {
+    "fact_label": "Facturat acum. (cert. 5ª)",
+    "facturat_eur": "91.554 €",
+    "cost_real_sub": "Cost real: 69.928 €",
+    "marge_sub": "Marge: +21.626 € (+23,6%)",
+    "prog_fact": "91.554€",
+    "prog_cost": "69.928€",
+    "prog_marge": "+23,6%",
+    "cost_bar_w": 76,
+    "marge_bar_w": 24,
+    "desv_val": "+23,6%",
+    "desv_text": "Facturat 91.554€ − Cost 69.928€<br>= Marge +21.626 € · Pressupost obert",
+    "mini_fact": "91.554 €",
+    "mini_cost": "69.928 €",
+    "mini_marge": "+21.626 €",
+    "alert_sub": "Facturat acum. cert. 5ª: 91.554€ · Cost real: 69.928€ · Marge: +21.626€ (+23,6%). Pressupost obert: el client afegeix feines sobre la marxa. Preparar 6ª certificació.",
+    "panel_sub": "69.928€ real / 91.554€ facturat (pressupost obert)",
+    "panel_pct": "+23,6%"
+  },
+  "irla": {
+    "cert_acum_sub": "Cert. acum.: 1.078.506 €",
+    "pend_sub": "Pendent: 82.464 €",
+    "mini_cert_acum": "1.078.506 €",
+    "mini_cert_mes": "101.089 €",
+    "mini_pendent": "82.464 €",
+    "mini_pct": "92,9%",
+    "cert_pct_bar": 92.9,
+    "desv_text": "Cost real ~921K€ vs cert. 1.079K€<br>Marge positiu · Recta final",
+    "panel_sub": "~921K€ cost / 1.079K€ cert."
+  }
+}
+</script>
+<script>
+// === DATA ===
+const taskCounts = { had: { total: 4, done: 0 }, rambla: { total: 3, done: 0 }, xirgu: { total: 3, done: 0 }, irla: { total: 3, done: 0 } };
+
+// === DYNAMIC DATES (auto-updates every time the page is opened) ===
+const now = new Date();
+const todayPad = d => String(d).padStart(2,'0');
+const todayStr = `${todayPad(now.getDate())}/${todayPad(now.getMonth()+1)}/${now.getFullYear()}`;
+
+// Title de la pàgina (tab del navegador)
+document.title = `OBRACTRL · Pedro · Jefe de Obra · ${todayStr}`;
+
+// Badge "Actualitzat" al header
+document.getElementById('header-badge-date').textContent = `Actualitzat: ${todayStr}`;
+
+// Data llarga al header (divendres 28 de març de 2026...)
+document.getElementById('fecha').textContent = now.toLocaleDateString('ca-ES',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+// Data a Font de dades
+document.getElementById('actualitzat-date').textContent = `Actualitzat: ${todayStr}`;
+
+// === HAD DIAS ===
+const inicio = new Date('2026-04-07');
+const hoy = new Date(); hoy.setHours(0,0,0,0); inicio.setHours(0,0,0,0);
+const diff = Math.max(0, Math.round((inicio-hoy)/(1000*60*60*24)));
+document.getElementById('kpi-had-days').textContent = diff;
+document.getElementById('diasHadBadge').textContent = diff + ' dies per a l\'inici';
+
+// === CALENDARI DINÀMIC ===
+// Mostra el mes actual. Si ja estem a la 2a meitat del mes, mostra el mes següent.
+// Events fixos per obra (data ISO → classe CSS)
+const calEvents = {
+  '2026-04-07':'event-had',
+  '2026-04-15':'event-cert',
+  '2026-04-28':'event-cert',
+  '2026-05-15':'event-cert',
+  '2026-06-12':'event-cert'
+};
+function buildCal(){
+  const ref = new Date();
+  // Si ja estem passada la meitat del mes, mostra el mes vinent
+  if(ref.getDate() > 15) ref.setMonth(ref.getMonth()+1);
+  const year = ref.getFullYear();
+  const month = ref.getMonth(); // 0-indexed
+  const todayReal = new Date();
+  const todayDay = (todayReal.getFullYear()===year && todayReal.getMonth()===month) ? todayReal.getDate() : null;
+  const monthNames = ['Gener','Febrer','Març','Abril','Maig','Juny','Juliol','Agost','Setembre','Octubre','Novembre','Desembre'];
+  const mn = `${monthNames[month]} ${year}`;
+  // Actualitza el títol del panell lateral
+  const panTitle = document.querySelector('.panel-title .cal-panel-month');
+  if(panTitle) panTitle.textContent = mn;
+  const fd = new Date(year,month,1).getDay();
+  const off = fd===0?6:fd-1;
+  const dim = new Date(year,month+1,0).getDate();
+  let h=`<div class="cal-header"><span class="cal-month">${mn}</span></div><div class="cal-grid">`;
+  ['Dl','Dm','Dx','Dj','Dv','Ds','Dg'].forEach(x=>h+=`<div class="cal-day-name">${x}</div>`);
+  for(let i=0;i<off;i++) h+=`<div class="cal-day empty">.</div>`;
+  for(let i=1;i<=dim;i++){
+    const iso = `${year}-${String(month+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
+    const cls = [i===todayDay?'today':'', calEvents[iso]||''].filter(Boolean).join(' ');
+    h+=`<div class="cal-day ${cls}">${i}</div>`;
+  }
+  h+='</div>';
+  document.getElementById('miniCal').innerHTML=h;
+}
+buildCal();
+
+// === TASK TOGGLE ===
+function toggleTask(el, obra){
+  const c=el.querySelector('.task-check'), t=el.querySelector('.task-text');
+  const on=c.classList.toggle('checked');
+  c.textContent=on?'✓':'';
+  t.classList.toggle('done'); el.classList.toggle('done');
+  if(on) taskCounts[obra].done++; else taskCounts[obra].done--;
+  updateAllKPIs();
+}
+function updateAllKPIs(){
+  const obras = ['had','rambla','xirgu','irla'];
+  let totalDone=0, totalAll=0;
+  obras.forEach(o=>{
+    const d=taskCounts[o].done, t=taskCounts[o].total;
+    totalDone+=d; totalAll+=t;
+    document.getElementById('count-'+o).textContent=d+'/'+t;
+    document.getElementById('s-'+o).textContent=d+'/'+t;
+    document.getElementById('s-'+o).style.color=d===t?'var(--green)':d>0?'var(--yellow)':'var(--text)';
+  });
+  document.getElementById('global-count').textContent=totalDone+'/'+totalAll;
+}
+updateAllKPIs();
+
+// === TABS ===
+const cardMap={had:'card-had',rambla:'card-rambla',xirgu:'card-xirgu',irla:'card-irla'};
+function setTab(id,btn){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  Object.values(cardMap).forEach(c=>document.getElementById(c).style.display='none');
+  if(id==='totes') Object.values(cardMap).forEach(c=>document.getElementById(c).style.display='block');
+  else document.getElementById(cardMap[id]).style.display='block';
+}
+// === POPULATE DATA FROM JSON BLOCK ===
+(function(){
+  try {
+    const D = JSON.parse(document.getElementById('obraData').textContent);
+    function getVal(obj, path) {
+      return path.split('.').reduce((o,k) => (o && o[k] !== undefined ? o[k] : undefined), obj);
+    }
+    // text content
+    document.querySelectorAll('[data-val]').forEach(el => {
+      const v = getVal(D, el.dataset.val);
+      if (v !== undefined) el.textContent = v;
+    });
+    // innerHTML (per elements amb <br>)
+    document.querySelectorAll('[data-html]').forEach(el => {
+      const v = getVal(D, el.dataset.html);
+      if (v !== undefined) el.innerHTML = v;
+    });
+    // progress bar widths
+    document.querySelectorAll('[data-width]').forEach(el => {
+      const v = getVal(D, el.dataset.width);
+      if (v !== undefined) el.style.width = v + '%';
+    });
+  } catch(e) { console.warn('obraData parse error:', e); }
+})();
+</script>
+</body>
+</html>
