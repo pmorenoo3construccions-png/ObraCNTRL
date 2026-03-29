@@ -26,30 +26,35 @@ except ImportError:
 # ─────────────────────────────────────────────────────────────
 # CONFIGURACIÓ DE RUTES
 # ─────────────────────────────────────────────────────────────
+# BASE = carpeta on es troba aquest script (repo GitHub)
 BASE = os.path.dirname(os.path.abspath(__file__))
+
+# OBRAS_BASE = carpeta local sincronitzada amb Google Drive
+# on es troben les carpetes de cada obra i els seus Excel
+OBRAS_BASE = r"C:\Users\rokit\GOOGLE DRIVE\OBRAS PEDRO"
 
 PATHS = {
     "rambla_costos": os.path.join(
-        BASE, "OBRAS ACTIVAS", "MT_CAP_RAMBLA",
+        OBRAS_BASE, "OBRAS ACTIVAS", "MT_CAP_RAMBLA",
         "04_VARIS", "CONTROL_COSTOS",
         "CONTROL COSTOS CAP Rambla.xlsx"
     ),
     "xirgu_costos": os.path.join(
-        BASE, "OBRAS ACTIVAS", "MARGARIDA_XIRGU_24",
+        OBRAS_BASE, "OBRAS ACTIVAS", "MARGARIDA_XIRGU_24",
         "04_VARIS", "Control costos",
         "Control costos Margarida Xirgu 24 Sitges.xlsx"
     ),
     "xirgu_cert_dir": os.path.join(
-        BASE, "OBRAS ACTIVAS", "MARGARIDA_XIRGU_24",
+        OBRAS_BASE, "OBRAS ACTIVAS", "MARGARIDA_XIRGU_24",
         "02_CERTIFICACIO_PRODUCCIO"
     ),
     "irla_costos": os.path.join(
-        BASE, "OBRAS ACTIVAS", "JOSEP_IRLA_32",
+        OBRAS_BASE, "OBRAS ACTIVAS", "JOSEP_IRLA_32",
         "04_VARIS", "Control costos",
         "Control costes Josep Irla Sitges.xlsx"
     ),
     "irla_cert_dir": os.path.join(
-        BASE, "OBRAS ACTIVAS", "JOSEP_IRLA_32",
+        OBRAS_BASE, "OBRAS ACTIVAS", "JOSEP_IRLA_32",
         "02_CERTIFICACIO_PRODUCCIO"
     ),
     "index_html": os.path.join(BASE, "index.html"),

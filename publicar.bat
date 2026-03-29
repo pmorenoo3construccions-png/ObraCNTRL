@@ -12,11 +12,14 @@ echo  ╚═══════════════════════�
 echo.
 
 REM ── Canviar al directori on es troba aquest .bat ──────────
+REM    (la carpeta del repo GitHub, p.ex. Documents\GitHub\ObraCNTRL)
 cd /d "%~dp0"
 
 REM ── 1. Generar dashboard amb dades fresques dels Excel ─────
+REM    (el script llegeix els Excel de GOOGLE DRIVE\OBRAS PEDRO
+REM     i escriu index.html en aquesta mateixa carpeta)
 echo [1/3] Llegint Excel i generant index.html...
-python generar_dashboard.py
+python "%~dp0generar_dashboard.py"
 if %ERRORLEVEL% NEQ 0 (
     echo.
     echo  ❌ ERROR generant el dashboard. Comprova els Excel i Python.
@@ -52,6 +55,6 @@ if %ERRORLEVEL% NEQ 0 (
 
 echo.
 echo  ✅ Dashboard publicat correctament!
-echo     Visible a: https://[el-teu-usuari].github.io/obractrl/
+echo     Visible a: https://pmorenoo3construccions-png.github.io/ObraCNTRL/
 echo.
 timeout /t 4 /nobreak > nul
