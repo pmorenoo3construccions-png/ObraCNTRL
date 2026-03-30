@@ -19,7 +19,7 @@ REM ── 1. Generar dashboard amb dades fresques dels Excel ─────
 REM    (el script llegeix els Excel de GOOGLE DRIVE\OBRAS PEDRO
 REM     i escriu index.html en aquesta mateixa carpeta)
 echo [1/3] Llegint Excel i generant index.html...
-python "%~dp0generar_dashboard.py"
+py "%~dp0generar_dashboard.py"
 if %ERRORLEVEL% NEQ 0 (
     echo.
     echo  ❌ ERROR generant el dashboard. Comprova els Excel i Python.
